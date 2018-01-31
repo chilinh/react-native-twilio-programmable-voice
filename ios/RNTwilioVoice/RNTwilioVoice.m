@@ -39,6 +39,10 @@ NSString * const StateRejected = @"REJECTED";
     return dispatch_get_main_queue();
 }
 
++ (BOOL)requiresMainQueueSetup {
+    return YES;
+}
+
 RCT_EXPORT_MODULE()
 
 - (NSArray<NSString *> *)supportedEvents
