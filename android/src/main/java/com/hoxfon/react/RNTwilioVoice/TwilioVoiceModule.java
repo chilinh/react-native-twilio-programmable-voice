@@ -23,6 +23,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
+import com.facebook.react.bridge.AssertionException;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableMap;
 
@@ -114,7 +115,8 @@ public class TwilioVoiceModule extends ReactContextBaseJavaModule implements Act
     private HeadsetManager headsetManager;
     private EventManager eventManager;
 
-    public TwilioVoiceModule(ReactApplicationContext reactContext) {
+    public TwilioVoiceModule(ReactApplicationContext reactContext,
+    boolean shouldAskForMicPermission) {
         super(reactContext);
         if (BuildConfig.DEBUG) {
             Voice.setLogLevel(LogLevel.DEBUG);
@@ -158,7 +160,7 @@ public class TwilioVoiceModule extends ReactContextBaseJavaModule implements Act
         /*
          * Ensure the microphone permission is enabled
          */
-        if (!checkPermissionForMicrophone()) {
+        if (shouldAskForMicPermission && !checkPermissionForMicrophone()) {
             requestPermissionForMicrophone();
         }
         /*
@@ -496,7 +498,11 @@ public class TwilioVoiceModule extends ReactContextBaseJavaModule implements Act
         if (accessToken.equals("")) {
             promise.reject(new JSApplicationIllegalArgumentException("Invalid access token"));
             return;
-        }
+        }        
+        
+        if(!checkPermissionForMicrophone()) {
+            promise.reject(new AssertionException("Can't init without microphone permission"));
+        }        
 
         TwilioVoiceModule.this.accessToken = accessToken;
         if (BuildConfig.DEBUG) {
