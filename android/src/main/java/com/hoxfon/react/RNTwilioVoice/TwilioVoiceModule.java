@@ -114,15 +114,17 @@ public class TwilioVoiceModule extends ReactContextBaseJavaModule implements Act
     private AudioFocusRequest focusRequest;
     private HeadsetManager headsetManager;
     private EventManager eventManager;
+    private boolean shouldAskForMicPermission;
 
-    public TwilioVoiceModule(ReactApplicationContext reactContext,
-    boolean shouldAskForMicPermission) {
+    public TwilioVoiceModule(ReactApplicationContext reactContext, boolean shouldAskForMicPermission) {
         super(reactContext);
         if (BuildConfig.DEBUG) {
             Voice.setLogLevel(LogLevel.DEBUG);
         } else {
             Voice.setLogLevel(LogLevel.ERROR);
         }
+
+        this.shouldAskForMicPermission = shouldAskForMicPermission;
         reactContext.addActivityEventListener(this);
         reactContext.addLifecycleEventListener(this);
 
@@ -146,28 +148,21 @@ public class TwilioVoiceModule extends ReactContextBaseJavaModule implements Act
          * Needed for setting/abandoning audio focus during a call
          */
         audioManager = (AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
-
-        PowerManager powerManager;
-
-        powerManager = (PowerManager) reactContext.getSystemService(Context.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.ON_AFTER_RELEASE, TAG);
-
-        keyguardManager = (KeyguardManager) reactContext.getSystemService(Context.KEYGUARD_SERVICE);
     }
 
     @Override
     public void onHostResume() {
+        /*
+         * Enable changing the volume using the up/down keys during a conversation
+         */
+        getCurrentActivity().setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+        registerReceiver();
         /*
          * Ensure the microphone permission is enabled
          */
         if (shouldAskForMicPermission && !checkPermissionForMicrophone()) {
             requestPermissionForMicrophone();
         }
-        /*
-         * Enable changing the volume using the up/down keys during a conversation
-         */
-        getCurrentActivity().setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-        registerReceiver();
     }
 
     @Override
