@@ -735,6 +735,13 @@ public class TwilioVoiceModule extends ReactContextBaseJavaModule implements Act
         audioManager.setSpeakerphoneOn(value);
     }
 
+    @ReactMethod
+    public void requestPermissions() {
+        if (!shouldAskForMicPermission && !checkPermissionForMicrophone()) {
+            requestPermissionForMicrophone();
+        }
+    }
+
     private void setAudioFocus() {
         if (audioManager == null) {
             return;
