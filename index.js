@@ -78,9 +78,9 @@ const Twilio = {
   sendDigits(digits) {
     TwilioVoice.sendDigits(digits);
   },
-  requestPermissions(senderId) {
+  requestPermissions() {
     if (Platform.OS === ANDROID) {
-      TwilioVoice.requestPermissions(senderId);
+      TwilioVoice.requestPermissions();
     }
   },
   getActiveCall() {
